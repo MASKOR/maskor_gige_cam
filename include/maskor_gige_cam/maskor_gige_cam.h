@@ -68,11 +68,11 @@ public:
     void setAutoFocusMethod(int i);
     void setNUCMode(int i);
     void setNoiseReduction(int i);
+    void setIRFrameRate(int i);
     void NUCAction();
     void setFocusStep(int i);
     void FocusDecrement();
     void FocusIncrement();
-
 
     //getter and setter
     boost::shared_ptr<cv::Mat> getImage();
@@ -85,7 +85,6 @@ private:
     PvDeviceInfo* DeviceInfo_;
     PvStream* Stream_;
     PvImage* PvImage_;
-    PvRawData* PvRawData_;
     PvGenParameterArray* DeviceParams_;
     PvGenParameterArray* StreamParams_;
     std::list<PvBuffer*> Bufferlist_;

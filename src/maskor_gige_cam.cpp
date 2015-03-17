@@ -22,11 +22,12 @@ GigeCam::GigeCam()
   {
     open();
     start();
-    setFocusPosition(1500);
-    setFocusDistance(3);
+    //setFocusPosition(1500);
+    setFocusDistance(3.0);
     setAutoFocusMethod(0);
-    setFocusStep(500);
+    setFocusStep(100);
     //setFocusDistance(10);
+    setIRFrameRate(1);
     getSensorInfo();
   }
   else
@@ -340,12 +341,18 @@ void GigeCam::setNoiseReduction(int i)
   DeviceParams_->SetEnumValue("NoiseReduction",(int64_t)i );
 }
 
+void GigeCam::setIRFrameRate(int i)
+{
+  //0 = 60Hz, 1 = 30Hz, 2 = 15Hz
+  std::cout << "GigeCam::setIRFrameRate(int i)" << std::endl;
+  DeviceParams_->SetEnumValue("IRFrameRate", (int64_t)i );
+}
+
 void GigeCam::NUCAction()
 {
   std::cout << "GigeCam::NUCAction()" << std::endl;
   DeviceParams_->ExecuteCommand( "NUCAction" );
 }
-
 
 void GigeCam::acquisitionStop()
 {
@@ -478,13 +485,13 @@ void GigeCam::getSensorInfo()
   DeviceParams_->GetEnumValue("AutoFocusMethod", autofocusmethod);
   std::cout << "AutoFocusMethod: " << autofocusmethod << " (0 = coarse, 1 = fine)" << std::endl;
      
-  int64_t focuspos; // low = near, high = far (for Flir A325sc)
+  int64_t focuspos; // min = 100, max = 3600 (for Flir A325sc)
   DeviceParams_->GetIntegerValue("FocusPos", focuspos);
-  std::cout << "FocusPos: " << focuspos << " (low = near, high = far)" << std::endl;
+  std::cout << "FocusPos: " << focuspos << " (min = 100, max = 3600 (for Flir A325sc) )" << std::endl;
 
   double_t focusdistance; //min = 0, max = 1000
   DeviceParams_->GetFloatValue("FocusDistance" , focusdistance);
-  std::cout << "FocusDistance: " << std::fixed << focusdistance << " meters" << std::endl;
+  std::cout << "FocusDistance: " << /*std::fixed* <<*/ focusdistance << " meters" << std::endl;
 
   int64_t focusstep; //stepsize for focusincrement and -decrement, min = 0, max = 1000, <250 might not move Focus
   DeviceParams_->GetIntegerValue("FocusStep", focusstep);
@@ -502,6 +509,13 @@ void GigeCam::getSensorInfo()
   DeviceParams_->GetEnumValue("NUCMode",nucmode);
   std::cout << "NUCMode: " << nucmode << " (0 = off, 1 = auto)" << std::endl;
 
+
+  std::cout << "\n--- Image stream registers ---\n" << std::endl;
+
+  
+  int64_t irframerate;
+  DeviceParams_->GetEnumValue("IRFrameRate", irframerate);
+  std::cout << "IRFrameRate: " << irframerate << " (0 = 60Hz, 1 = 30Hz, 2 = 15Hz)" << std::endl;
 
 
   std::cout << "\n***************************\n" << std::endl;
@@ -645,17 +659,16 @@ void GigeCam::_imageThread()
   while ( true )
   {
     PvBuffer *lBuffer = NULL;
-    // TEST PvBuffer *lBuffer = new PvBuffer(PvPayloadTypeRawData);
     PvResult lOperationResult;
     
     // Retrieve next buffer
     PvResult lResult = Stream_->RetrieveBuffer( &lBuffer, &lOperationResult, 1000 );
-    //std::cout << "PayloadType = " << lBuffer->GetPayloadType() << std::endl;
+    
     if ( lResult.IsOK() )
     {
       if ( lOperationResult.IsOK() )
       {
-        PvPayloadType lType;//TEST  = lBuffer->GetPayloadType();
+        PvPayloadType lType;
 
         lFrameRate->GetValue( lFrameRateVal );
         lBandwidth->GetValue( lBandwidthVal );
@@ -664,8 +677,6 @@ void GigeCam::_imageThread()
         uint32_t lWidth = 0, lHeight = 0;
         lType = lBuffer->GetPayloadType();
         
-        //std::cout << "PayloadType = " << lType << std::endl;
-
         std::cout << std::fixed << std::setprecision( 1 );
         std::cout << lDoodle[ lDoodleIndex ];
         std::cout << " BlockID: " << std::uppercase << std::hex << std::setfill( '0' ) << std::setw( 16 ) << lBuffer->GetBlockID();
@@ -674,8 +685,7 @@ void GigeCam::_imageThread()
         {
           // Get image specific buffer interface.
           PvImage_ = lBuffer->GetImage();
-          //PvRawData_ = lBuffer->GetRawData();
-                    
+                             
           // Read width, height.
           lWidth = lBuffer->GetImage()->GetWidth();
           lHeight = lBuffer->GetImage()->GetHeight();
@@ -702,11 +712,10 @@ void GigeCam::_imageThread()
       {
         _showImages();
       }
-
-      //_ImgtoBinary();
-
-      double focusdistance = getFocusDistance(); //min = 0, max = 1000
       
+      double focusdistance = getFocusDistance(); //min = 0, max = 1000
+
+      //Get keyboard input whithout interruption
       char ch = '0';
       _changemode(1);
       if( _kbhit() )
@@ -716,12 +725,9 @@ void GigeCam::_imageThread()
 
       switch(ch){
         case 'a':
-          //std::cout << "CASE a" << std::endl;
           autoFocus();
           break;
         case '+':
-          //std::cout << "CASE +" << std::endl;
-          //setFocusDirection(1);
           FocusIncrement();
           //if(focusdistance != 1000)
           //{
@@ -730,8 +736,6 @@ void GigeCam::_imageThread()
           getSensorInfo();
           break;
         case '-':
-          //std::cout << "CASE -" << std::endl;
-          //setFocusDirection(2);
           FocusDecrement();
           //if(focusdistance != 0)
           //{
@@ -739,9 +743,7 @@ void GigeCam::_imageThread()
           //}
           getSensorInfo();
           break;
-        case 's':
-          //std::cout << "CASE s" << std::endl;
-          //setFocusDirection(0);
+        case 'i':
           getSensorInfo();
           break;
         case 'f':
@@ -755,17 +757,18 @@ void GigeCam::_imageThread()
           }
           break;
         case 'p':
+          //Only exist to test function
           setFocusPosition(3000);
           break;
       }
        
       _changemode(0);
 
-      int focuspos = getFocusPosition(); // low = near, high = far (for Flir A325sc)
-      std::cout << "FocusPos: " << focuspos << " (low = near, high = far)" << std::endl;
+      int focuspos = getFocusPosition();
+      std::cout << "FocusPos: " << focuspos << " (min = 100, max = 3600 (for Flir A325sc) )" << std::endl;
 
       focusdistance = getFocusDistance();
-      std::cout << "FocusDistance: " << std::fixed << focusdistance << " meters" << std::endl;
+      //std::cout << "FocusDistance: " << /*std::fixed << */focusdistance << " meters" << std::endl;
 
       // Re-queue the buffer in the stream object
       Stream_->QueueBuffer( lBuffer );
