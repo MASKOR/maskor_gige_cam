@@ -94,7 +94,7 @@ generate_dynamic_reconfigure_options(cfg/Flir.cfg)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-#  LIBRARIES maskor_gige_cam
+   LIBRARIES maskor_gige_cam
 #  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
@@ -162,7 +162,6 @@ target_link_libraries(maskor_gige_cam
 
 target_link_libraries(maskor_flir_cam_node
   ${catkin_LIBRARIES}
-  maskor_gige_cam
 )
 
 
