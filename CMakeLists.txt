@@ -16,7 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   dynamic_reconfigure
   sensor_msgs
-  mascor_gige_cam
 )
 
 ## System dependencies are found with CMake's conventions
