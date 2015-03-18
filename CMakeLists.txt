@@ -162,6 +162,7 @@ target_link_libraries(maskor_gige_cam
 
 target_link_libraries(maskor_flir_cam_node
   ${catkin_LIBRARIES}
+  maskor_gige_cam
 )
 
 
