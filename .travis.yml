@@ -35,7 +35,7 @@ install:
   - chmod +x ./eBUS_SDK_4.0.6.3228_Ubuntu-12.04-x86_64.run
   - cd ~/ros/ws_$REPOSITORY_NAME/src/maskor_gige_cam/
   - chmod +x ./autoinstall_eBUS_SDK.exp
-  - ./autoinstall_eBUS_SDK.exp
+  - sudo ./autoinstall_eBUS_SDK.exp
   #- sudo ln -sf /lib/x86_64-linux-gnu/libudev.so.1 /lib/x86_64-linux-gnu/libudev.so.0
 
 before_script:
