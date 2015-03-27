@@ -76,7 +76,6 @@ public:
 
 
     //Sensor setter
-    void setIRFormat(int i);
     void setSize(int w, int h);
     void setOffset(int x, int y);
     void setPixelFormat(int i);
@@ -92,6 +91,7 @@ public:
     void setNUCMode(int i);
     void setNoiseReduction(int i);
     void setIRFrameRate(int i);
+    void setIRFormat(int i);
     void NUCAction();
     void setFocusStep(int i);
     void FocusDecrement();
