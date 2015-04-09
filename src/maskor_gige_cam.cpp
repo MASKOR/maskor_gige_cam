@@ -45,8 +45,8 @@ GigeCam::GigeCam()
   {
     open();
     start();
-    //setFocusPosition(1500);
-    setFocusDistance(3.0);
+    setFocusPosition(2700);
+    //setFocusDistance(3.0);
     setAutoFocusMethod(0);
     setFocusStep(100);
     //setFocusDistance(10);
