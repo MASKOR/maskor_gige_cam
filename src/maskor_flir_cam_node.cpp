@@ -78,8 +78,10 @@ void FlirNode::receiveAndPublish()
         }
 
         //publish to ros
-        ImagePtr_ = cv_bridge::CvImage(std_msgs::Header(), "mono16", *RawImagePtr_ ).toImageMsg();
-        RawImagePub_.publish(ImagePtr_);
+
+        // -- old publishing --
+        //ImagePtr_ = cv_bridge::CvImage(std_msgs::Header(), "mono16", *RawImagePtr_ ).toImageMsg();
+        //RawImagePub_.publish(ImagePtr_);
 
         ImagePtr_ = cv_bridge::CvImage(std_msgs::Header(), "32FC", *TemperatureImagePtr_ ).toImageMsg();
         TemperatureImagePub_.publish(ImagePtr_);
@@ -87,6 +89,28 @@ void FlirNode::receiveAndPublish()
         ImagePtr_ = cv_bridge::CvImage(std_msgs::Header(), "bgr8", *ThermalImagePtr_ ).toImageMsg();
         ThermalImagePub_.publish(ImagePtr_);
 
+        // -- new publishing -> with timestamp <- --
+        cv_bridge::CvImage raw_out_msg;
+        raw_out_msg.header       = std_msgs::Header(); // New Header
+        raw_out_msg.header.stamp = ros::Time::now();
+        raw_out_msg.encoding     = sensor_msgs::image_encodings::MONO16; // Or whatever
+        raw_out_msg.image        = *RawImagePtr_; //output_im;//img;//cv_ptr->image;//output_img;
+        RawImagePub_.publish(raw_out_msg.toImageMsg());	
+
+        // cv_bridge::CvImage temperature_out_msg;
+        // temperature_out_msg.header       = std_msgs::Header(); // New Header
+        // temperature_out_msg.header.stamp = ros::Time::now();
+        // temperature_out_msg.encoding     = sensor_msgs::image_encodings::32FC; // ERROR HERE!!! FIX IT FIRST
+        // temperature_out_msg.image        = *TemperatureImagePtr_; //output_im;//img;//cv_ptr->image;//output_img;
+        // TemperatureImagePub_.publish(temperature_out_msg.toImageMsg());	
+
+        // cv_bridge::CvImage thermal_out_msg;
+        // thermal_out_msg.header       = std_msgs::Header(); // New Header
+        // thermal_out_msg.header.stamp = ros::Time::now();
+        // thermal_out_msg.encoding     = sensor_msgs::image_encodings::bgr8; // ERROR HERE!!! FIX IT FIRST
+        // thermal_out_msg.image        = *ThermalImagePtr_; //output_im;//img;//cv_ptr->image;//output_img;
+        // ThermalImagePub_.publish(thermal_out_msg.toImageMsg());	
+        
         TemperatureImagePub2_.publish(temperatures);
     }
 

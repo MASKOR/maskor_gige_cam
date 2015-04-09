@@ -45,12 +45,13 @@ GigeCam::GigeCam()
   {
     open();
     start();
-    //setFocusPosition(1500);
-    setFocusDistance(3.0);
+    setFocusPosition(2700);
+    //setFocusDistance(3.0);
     setAutoFocusMethod(0);
     setFocusStep(100);
     //setFocusDistance(10);
     setIRFrameRate(1);
+    setIRFormat(2);
     getSensorInfo();
   }
   else
@@ -541,6 +542,11 @@ void GigeCam::getSensorInfo()
   std::cout << "IRFrameRate: " << irframerate << " (0 = 60Hz, 1 = 30Hz, 2 = 15Hz)" << std::endl;
 
 
+  int64_t irformat;
+  DeviceParams_->GetEnumValue("IRFormat", irformat);
+  std::cout << "IRFormat: " << irformat << " (0 = Signal linear, 1 = 0.1K resolution, 2 = 0.01K resolution)" << std::endl;
+
+  
   std::cout << "\n***************************\n" << std::endl;
 
 }
